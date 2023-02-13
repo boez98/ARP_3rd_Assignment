@@ -5,7 +5,7 @@ Andrea Bolla 4482930
 Anna Possamai 5621738
 
 # Introduction
-The task is to design, develop, test and deploy is an interactive simulator of a (simplified) typical vision system, as the second assignment, able to track an object in a 2-D plane. This is a true example of an industrial vision system in a robotic manufacturing workshop.
+The task is to design, develop, test and deploy an interactive simulator of a (simplified) typical vision system, as the second assignment, able to track an object in a 2-D plane. This is a true example of an industrial vision system in a robotic manufacturing workshop.
 
 This assignment requires the use of a shared memory in which two processes operate simultaneously, as happens in reality in similar applications, including TCP client/server features.
 
@@ -19,12 +19,13 @@ We will use an 80 x 30 ncurses window. The video memory, for realism, will be 16
 
 
 Therefore the application, when launched, asks for one execution modality:
-1. normal, as assignment 2
+0. normal, as assignment 2
+1. client: the application runs normally as assignment 2 and sends its keyboard input to another
+application (on a different machine) running in server mode
 2. server: the application does not use the keyboard for input: it receives input from another
 application (on a different machine) running in client mode
-3. client: the application runs normally as assignment 2 and sends its keyboard input to another
-application (on a different machine) running in server mode
-When selecting modes 2 and 3 the application obviously asks address and port of the companion application.
+
+When selecting modes 1 and 2 the application obviously asks address and port of the companion application.
 
 # Protocol
 To assure that any application is able to properly connect to any other application (implemented by some other student/group), a communication protocol must be defined.
@@ -40,10 +41,6 @@ To assure that any application is able to properly connect to any other applicat
 Two ncurses window will spawn:
 1. Using arrow keys, we will move a spot in a window to simulate the perception of the camera. The spot that we will see by moving will produce the creation of a realistic RGB image. By pressing a key, or by operating the mouse on a button, a snapshot of the image memory will be saved on a .bmp file.
 2. In a second ncurses window, also 80 x 30, the position trace of the center of the image will be shown.
-
-
-
-
 
 
 
@@ -84,25 +81,10 @@ then to run it:
 
 
 # Code
-I wasn't able to give as user input the ```TYPE```, the ```PORT``` and the ```HOST```, so you have to change it manually inside the code.
+     
+The code work perfectly on the localhost both as server and as client, we have to try on different machine.
 
-
-My idea was to write in the ```run.sh``` something like the following code to pass the input setted from the user and give it to the code as argv, but I received crash errors and I wasn't able to fix it so I abandoned this idea without finding another solution:
-     
-     echo Insert Type: 0 Shared Memory, 1 TCP-Client, 2 TCP-Server
-     read TYPE
-     
-     echo Insert Port
-     read PORT
-     
-     echo Insert HOST
-     read HOST
-     
-     ./master $TYPE $PORT $HOST
-     
-The code work perfectly on the localhost both as server and as client, I have to try on different machine.
-
-I've noticed that when I am in client mode and I press the arrow or the print button, I send and receive the following integer: 
+We've noticed that when we are in client mode and we press the arrow or the print button, we send and receive the following integer: 
 
      values: 
      Arrow    left 260, right 261, up 259, down 258
@@ -110,7 +92,7 @@ I've noticed that when I am in client mode and I press the arrow or the print bu
      
 
 
-this is why I made the following code in server mode, I didn't understand if for example the ```KEY_DOWN``` value is equal to 258 or not:     
+this is why we made the following code in server mode, we didn't understand if for example the ```KEY_DOWN``` value is equal to 258 or not:     
      
     // read the message from client and copy it in buffer
     read(connfd, buffer, sizeof(buffer));
@@ -128,8 +110,10 @@ this is why I made the following code in server mode, I didn't understand if for
                .
 
 
-than I setted ```cmd``` equal to ```KEY_DOWN``` because in the file header there is the formula  responsible for the creation of both the values ```circle.x``` and ```circle.y``` that use the KEY_ input.  Then, we use it with the shared memory to move the circle center in the ncurse window of the process B.
+than we setted ```cmd``` equal to ```KEY_DOWN``` because in the file header there is the formula  responsible for the creation of both the values ```circle.x``` and ```circle.y``` that use the KEY_ input.  Then, we use it with the shared memory to move the circle center in the ncurse window of the process B.
 
 
 # Improvement
-Obviusly, the main improvement is to create a user interface for setting the parameters ```TYPE```, ```PORT``` and ```HOST```. Another improvement could be the creation of functions to tidy up the code and make it more clear, for example function with inside the code for the  TCP/Socket creation and the same for the shared memory...
+
+A possible improvement could be the creation of functions to tidy up the code and make it more clear, for example function with inside the code for the  TCP/Socket creation and the same for the shared memory...
+In addition, a check could be added to verify that the values entered are those required and, if not, print an error message on the terminal and ask the user to re-enter the values.
